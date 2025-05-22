@@ -36,6 +36,5 @@ export default async function handler(req, res) {
   }
 }
 
-
 add stripe checkout endpoint
 
