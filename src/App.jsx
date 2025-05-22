@@ -11,12 +11,26 @@ export default function App() {
   const [selectedPixel, setSelectedPixel] = useState(null);
   const pixels = Array.from({ length: PIXELS * PIXELS }, (_, i) => i);
 
-  const handleClick = (index) => {
-    if (!(index in boughtPixels)) {
-      alert(`Pixel ${index + 1} selected. Simulated purchase.`);
-      setSelectedPixel(index);
+  const buyPixel = async (index) => {
+  if (boughtPixels[index]) return;
+
+  try {
+    const res = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pixelId: index }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert('Error creando la sesión de pago.');
     }
-  };
+  } catch (error) {
+    console.error('Error al iniciar compra:', error);
+    alert('Error conectando con Stripe.');
+  }
+};
 
   return (
     <div className="page">
@@ -45,7 +59,7 @@ export default function App() {
                   boughtPixels[i] ? 'bought' : selectedPixel === i ? 'active' : ''
                 }`}
                 title={boughtPixels[i] || ''}
-                onClick={() => handleClick(i)}
+                onClick={() => buyPixel(i)}
               />
             ))}
           </div>
